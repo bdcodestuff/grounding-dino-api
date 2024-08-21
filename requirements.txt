@@ -12,3 +12,4 @@ PyYAML
 python-multipart
 PyJWT
 numpy
+accelerate

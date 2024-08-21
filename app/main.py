@@ -37,11 +37,12 @@ async def segment(image: UploadFile = File(...), authorization: str = Header(Non
             raise HTTPException(status_code=400, detail="Invalid image format")
 
         loaded_image = load_image_from_file(await image.read())
-        
+
         objects_and_boxes = generate_bboxes(model, processor, loaded_image, text)
         
+        logger.info(text)
 
-        return json.dumps(objects_and_boxes)
+        return {"bounding_boxes" : json.dumps(objects_and_boxes)}
 
     except Exception as e:
         logger.exception("Error in /detect endpoint")
