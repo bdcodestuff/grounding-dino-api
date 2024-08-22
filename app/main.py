@@ -1,6 +1,6 @@
 import jwt
 import os
-from fastapi import FastAPI, Header, File, UploadFile, HTTPException
+from fastapi import FastAPI, Header, File, UploadFile, HTTPException, Body
 import logging.config
 import json
 from .model import load_model, generate_bboxes
@@ -25,7 +25,7 @@ async def read_root():
     return {"message": "Welcome to the Image Detection API!"}
 
 @app.post("/detect")
-async def segment(image: UploadFile = File(...), authorization: str = Header(None), text: str = None):
+async def segment(image: UploadFile = File(...), authorization: str = Header(None), text: str = Body(None)):
 
     try:
         decoded = secure(authorization)

@@ -26,7 +26,7 @@ def load_model(model_name):
         raise e
 
 
-def generate_bboxes(model, processor, image, text):
+def generate_bboxes(model, processor, image, text=None):
     try:
         #inputs = processor(text=text, images=[image] * len(text), padding="max_length", return_tensors="pt")
 
@@ -43,9 +43,18 @@ def generate_bboxes(model, processor, image, text):
 
         # convert outputs (bounding boxes and class logits) to COCO API
 
-        target_sizes = torch.tensor([image.size[::-1]])
-        results = processor.image_processor.post_process_object_detection(
-            outputs, threshold=0.35, target_sizes=target_sizes
+        # target_sizes = torch.tensor([image.size[::-1]])
+        
+        # results = processor.image_processor.post_process_object_detection(
+        #     outputs, threshold=0.35, target_sizes=target_sizes
+        # )[0]
+
+        results = processor.post_process_grounded_object_detection(
+            outputs,
+            inputs.input_ids,
+            box_threshold=0.4,
+            text_threshold=0.3,
+            target_sizes=[image.size[::-1]]
         )[0]
 
         logger.info(f"Got some objects")
@@ -54,7 +63,7 @@ def generate_bboxes(model, processor, image, text):
         for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
 
             box = [round(i, 1) for i in box.tolist()]
-            result.append({'box':box, 'label':label.item(), 'confidence':round(score.item(),2)})
+            result.append({'box':box, 'label':label, 'confidence':round(score.item(),2)})
             #logger.info(f"Detected {label.item()} with confidence " f"{round(score.item(), 2)} at location {box}")
 
         return result
